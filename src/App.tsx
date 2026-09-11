@@ -19,11 +19,19 @@ function App() {
     setIsHelpOpen(false);
   };
 
+  const handleMapClick = (position: [number, number]) => {
+    setMarkerPosition(position);
+    setSelectedCoordinate(position);
+    setIsSidebarOpen(true);
+    setIsHelpOpen(false);
+  };
+
   return (
     <AppShell isDarkMode={isDarkMode}>
       <MapComponent
         markerPosition={markerPosition}
         onMarkerClick={handleMarkerClick}
+        onMapClick={handleMapClick}
       />
 
       <FloatingButton

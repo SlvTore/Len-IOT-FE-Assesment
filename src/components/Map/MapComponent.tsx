@@ -12,18 +12,23 @@ import { useMapInteraction } from '../../hooks/useMapInteraction';
 interface MapComponentProps {
   markerPosition: [number, number] | null;
   onMarkerClick?: (position: [number, number]) => void;
+  onMapClick?: (position: [number, number]) => void;
 }
 
 export default function MapComponent({
   markerPosition,
   onMarkerClick,
+  onMapClick,
 }: MapComponentProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const sourceRef = useRef<VectorSource | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const markerClickRef = useRef(onMarkerClick);
+  const mapClickRef = useRef(onMapClick);
+
   markerClickRef.current = onMarkerClick;
+  mapClickRef.current = onMapClick;
 
   useMapInteraction(mapRef, sourceRef, markerPosition, isMapReady);
 
@@ -34,10 +39,23 @@ export default function MapComponent({
     const map = new Map({
       target: elementRef.current,
       layers: [
-        new TileLayer({ source: new OSM() }),
+        new TileLayer({
+          source: new OSM(),
+        }),
         new VectorLayer({
           source,
-          style: new Style({ image: new CircleStyle({ radius: 8, fill: new Fill({ color: '#06B6D4' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) }),
+          style: new Style({
+            image: new CircleStyle({
+              radius: 10,
+              fill: new Fill({
+                color: '#ef4444',
+              }),
+              stroke: new Stroke({
+                color: '#ffffff',
+                width: 3,
+              }),
+            }),
+          }),
         }),
       ],
       view: new View({ center: fromLonLat([118.0149, -2.5489]), zoom: 5 }),
@@ -47,15 +65,20 @@ export default function MapComponent({
     setIsMapReady(true);
 
     const handleMapClick = (event: any) => {
+      const coordinate = (toLonLat(event.coordinate) ??
+        event.coordinate) as [number, number];
+
       const feature = map.forEachFeatureAtPixel(
         event.pixel,
         (candidateFeature) => candidateFeature
       );
 
-      if (!feature) return;
+      if (feature) {
+        markerClickRef.current?.(coordinate);
+        return;
+      }
 
-      const coordinate = (toLonLat(event.coordinate) ?? event.coordinate) as [number, number];
-      markerClickRef.current?.(coordinate);
+      mapClickRef.current?.(coordinate);
     };
 
     map.on('singleclick', handleMapClick);
