@@ -1,9 +1,12 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+jest.mock('./components/Map/MapComponent', () => function MockMapComponent() {
+  return <div data-testid="map" />;
+});
+
+test('renders coordinate converter application', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByText(/Coordinate Converter Map/i)).toBeInTheDocument();
+  expect(screen.getByTestId('map')).toBeInTheDocument();
 });
