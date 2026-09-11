@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCoordinateConverter } from '../../hooks/useCoordinateConverter';
 import DMStoDD from './DMStoDD';
 import DDtoDMS from './DDtoDMS';
 
 interface ConversionFormProps {
   isDarkMode: boolean;
+  initialCoordinate: [number, number] | null;
   onAddToMap: (longitude: number, latitude: number) => void;
 }
 
-export default function ConversionForm({ isDarkMode, onAddToMap }: ConversionFormProps) {
+export default function ConversionForm({ isDarkMode, initialCoordinate, onAddToMap }: ConversionFormProps) {
   const [activeTab, setActiveTab] = useState<'DMS_TO_DD' | 'DD_TO_DMS'>('DMS_TO_DD');
   const converter = useCoordinateConverter();
+  const { setDecimalLatitude, setDecimalLongitude } = converter;
+
+  useEffect(() => {
+    if (!initialCoordinate) return;
+
+    const [longitude, latitude] = initialCoordinate;
+    setDecimalLongitude(longitude);
+    setDecimalLatitude(latitude);
+    setActiveTab('DD_TO_DMS');
+  }, [initialCoordinate, setDecimalLatitude, setDecimalLongitude]);
 
   return (
     <div className="flex flex-col gap-4 text-sm">

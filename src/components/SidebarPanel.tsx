@@ -5,11 +5,12 @@ import ConversionForm from './ConversionForm/ConversionForm';
 interface SidebarPanelProps {
   isOpen: boolean;
   isDarkMode: boolean;
+  initialCoordinate: [number, number] | null;
   onClose: () => void;
   onAddToMap: (longitude: number, latitude: number) => void;
 }
 
-export default function SidebarPanel({ isOpen, isDarkMode, onClose, onAddToMap }: SidebarPanelProps) {
+export default function SidebarPanel({ isOpen, isDarkMode, initialCoordinate, onClose, onAddToMap }: SidebarPanelProps) {
   return (
     <aside
       className={`absolute right-4 top-0 h-full w-80 overflow-hidden rounded-2xl border shadow-2xl transition-transform sm:w-96 ${
@@ -48,6 +49,7 @@ export default function SidebarPanel({ isOpen, isDarkMode, onClose, onAddToMap }
         >
           <ConversionForm
             isDarkMode={isDarkMode}
+            initialCoordinate={initialCoordinate}
             onAddToMap={onAddToMap}
           />
         </div>

@@ -10,10 +10,21 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
+  const [selectedCoordinate, setSelectedCoordinate] = useState<[number, number] | null>(null);
+
+  const handleMarkerClick = (position: [number, number]) => {
+    setSelectedCoordinate(position);
+    setMarkerPosition(position);
+    setIsSidebarOpen(true);
+    setIsHelpOpen(false);
+  };
 
   return (
     <AppShell isDarkMode={isDarkMode}>
-      <MapComponent markerPosition={markerPosition} />
+      <MapComponent
+        markerPosition={markerPosition}
+        onMarkerClick={handleMarkerClick}
+      />
 
       <FloatingButton
         isDarkMode={isDarkMode}
@@ -33,10 +44,13 @@ function App() {
       <SidebarPanel
         isOpen={isSidebarOpen}
         isDarkMode={isDarkMode}
+        initialCoordinate={selectedCoordinate}
         onClose={() => setIsSidebarOpen(false)}
-        onAddToMap={(longitude, latitude) =>
-          setMarkerPosition([longitude, latitude])
-        }
+        onAddToMap={(longitude, latitude) => {
+          const position: [number, number] = [longitude, latitude];
+          setMarkerPosition(position);
+          setSelectedCoordinate(position);
+        }}
       />
 
       <HelpPanel

@@ -8,7 +8,7 @@ import ConversionForm from '../ConversionForm/ConversionForm';
 
 describe('ConversionForm', () => {
   test('renders the DMS to DD form by default', () => {
-    render(<ConversionForm isDarkMode={false} onAddToMap={jest.fn()} />);
+    render(<ConversionForm isDarkMode={false} initialCoordinate={null} onAddToMap={jest.fn()} />);
 
     expect(screen.getByRole('button', { name: 'DMS / DD' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'DD / DMS' })).toBeInTheDocument();
@@ -17,7 +17,7 @@ describe('ConversionForm', () => {
   });
 
   test('switches to the DD to DMS form', () => {
-    render(<ConversionForm isDarkMode={false} onAddToMap={jest.fn()} />);
+    render(<ConversionForm isDarkMode={false} initialCoordinate={null} onAddToMap={jest.fn()} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'DD / DMS' }));
 
@@ -27,7 +27,7 @@ describe('ConversionForm', () => {
 
   test('converts DMS input and enables map placement', () => {
     const onAddToMap = jest.fn();
-    render(<ConversionForm isDarkMode={false} onAddToMap={onAddToMap} />);
+    render(<ConversionForm isDarkMode={false} initialCoordinate={null} onAddToMap={onAddToMap} />);
 
     const inputs = screen.getAllByRole('spinbutton');
     fireEvent.change(inputs[0], { target: { value: '49' } });

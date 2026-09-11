@@ -5,19 +5,25 @@ import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { useMapInteraction } from '../../hooks/useMapInteraction';
 
 interface MapComponentProps {
   markerPosition: [number, number] | null;
+  onMarkerClick?: (position: [number, number]) => void;
 }
 
-export default function MapComponent({ markerPosition }: MapComponentProps) {
+export default function MapComponent({
+  markerPosition,
+  onMarkerClick,
+}: MapComponentProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const sourceRef = useRef<VectorSource | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const markerClickRef = useRef(onMarkerClick);
+  markerClickRef.current = onMarkerClick;
 
   useMapInteraction(mapRef, sourceRef, markerPosition, isMapReady);
 
@@ -40,7 +46,22 @@ export default function MapComponent({ markerPosition }: MapComponentProps) {
     sourceRef.current = source;
     setIsMapReady(true);
 
+    const handleMapClick = (event: any) => {
+      const feature = map.forEachFeatureAtPixel(
+        event.pixel,
+        (candidateFeature) => candidateFeature
+      );
+
+      if (!feature) return;
+
+      const coordinate = (toLonLat(event.coordinate) ?? event.coordinate) as [number, number];
+      markerClickRef.current?.(coordinate);
+    };
+
+    map.on('singleclick', handleMapClick);
+
     return () => {
+      map.un('singleclick', handleMapClick);
       map.setTarget(undefined);
       mapRef.current = null;
       sourceRef.current = null;

@@ -6,8 +6,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import App from '../App';
 
-jest.mock('../components/Map/MapComponent', () => function MockMapComponent() {
-  return <div data-testid="map" />;
+jest.mock('../components/Map/MapComponent', () => function MockMapComponent({ onMarkerClick }: { onMarkerClick?: (position: [number, number]) => void }) {
+  return (
+    <div data-testid="map">
+      <button onClick={() => onMarkerClick?.([106.816666, -6.2])}>Existing marker</button>
+    </div>
+  );
 });
 
 describe('application workflow', () => {
@@ -29,8 +33,18 @@ describe('application workflow', () => {
   test('toggles the application theme state', () => {
     render(<App />);
     const toggle = screen.getByRole('button', { name: 'Toggle theme' });
-    expect(toggle.querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Toggle theme' })).toBeInTheDocument();
     fireEvent.click(toggle);
-    expect(toggle.querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Toggle theme' })).toBeInTheDocument();
+  });
+
+  test('opens the editor with the selected marker coordinate', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Existing marker' }));
+
+    expect(screen.getByText('Convert Coordinate DD to DMS')).toBeInTheDocument();
+    expect(screen.getAllByRole('spinbutton')[0]).toHaveValue(-6.2);
+    expect(screen.getAllByRole('spinbutton')[1]).toHaveValue(106.816666);
   });
 });
