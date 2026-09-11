@@ -1,45 +1,89 @@
 # Halo, Saya Mochamad Nur Fadillah
 
-Project ini merupakan Converter untuk mengubah nilai Longitude dan Latitude yang berupa 
+Project ini merupakan Converter untuk mengubah nilai Geografis Degree, Minutes, dan juga second menjadi Decimal degrees yang lebih umum dan sederhana untuk memposisikan koordinat.
 
-## Available Scripts
+## Implementasi
+
+I. Inisiasi Peta OSM
+Peta yang dimuat dari library openlayers, disertai button/toggle untuk menampilkan form fungsi utama konversi
+[Lihat implementasi MapComponent](./src/components/Map/MapComponent.tsx) dan floating di [Lihat Implementasi Floating button](./src/components/FloatingButton/FloatingButton.tsx)
+
+II. Konversi Latitude dan Longitude
+Setelah user mengakses button, maka akan langsung membuka sidebar panel form untuk fungsi utama yaitu konversi antara DD dan Dms atau sebaliknya.
+[Lihat Implementasi Sidebar](./src/components/SidebarPanel.tsx) & berisi [Form Konversi](./src/components/ConversionForm/ConversionForm.tsx)
+
+Saat mengisi Nilai DMS ke DD, user diperlukan mmentukan arah angin antara N = utara, E = Timur, S= Selatan, dan W = West, nantinya untuk nilai S dan W, akan dikonversi dulu ke nilai negatif dengan
+`*= -1`
+setelah itu nilai akan dikonversi melalui rumus perhitungan :
+` degree + minutes / 60 + seconds / 3600`
+
+Saat mengisi NIlai DD ke DSMS, user perlu memasukkan nilai parameter desimal degree yang mencakup Longitude dan latitude
+ada fungsi math yang mencakup 
+1.Math.abs() untuk mengambil nilai secara absolutt koordinat terlebih dahulu menjadi  nilai yang positif
+2. Math.floor untukmembulatkan nilai Sebagai contoh, dari nilai 49.502778, bagian derajatnya adalah 49. 
+3.Sisa nilai desimalnya kemudian digunakan untuk menghitung menit.
+`const minutesFloat = (absoluteDecimal - degree) * 60;`
+Sisa desimal dikalikan 60 karena satu derajat terdiri dari enam puluh menit.Nilai menit dibulatkan ke bawah menggunakan mathfloor
+4.Setelah menit diperoleh, bagian desimal dari menit dikonversi menjadi detik Nilai tersebut kembali dikalikan 60 karena satu menit terdiri dari enam puluh detik
+`const seconds = Math.round((minutesFloat - minutes) * 60);`
+5.Pada bagian berikutnya, fungsi menentukan arah koordinat berdasarkan nilai asli sebelum menggunakan Math.abs(). Untuk latitude, nilai positif menunjukkan arah utara (N) dan nilai negatif menunjukkan arah selatan (S)Untuk longitude, nilai positif menunjukkan arah timur (E) dan nilai negatif menunjukkan arah barat (W).
+`const direction: Direction = isLatitude ? decimal >= 0 ? 'N' : 'S': decimal >= 0 ? 'E' : 'W';`
+Hasil akhirnya dikembalikan sebagai object yang berisi derajat, menit, detik, dan arah
+[Lihat Rumus Konversi](./src/utils/coordinateConverter.ts) & hasil dilemparkan ke [Implementasi result](./src/hooks/useCoordinateConverter.ts)
+
+III. Add to Map
+Pada form DMS to dd terdapat fungsi pinpoint atau markah ke titik yang telah dikonversi
+[Lihat fungsi Markah](./src/hooks/useMapInteraction.ts)
+
+IV. Tambahan
+Terdapat toggle dark mode dan juga Help Panel 
+[Lihat Help Panel ](./src/components/HelpPanel.tsx)
+
+## Run dan Test
+
+### Menjalankan Aplikasi
+
+1.Pastikan Node.js dan npm sudah terpasang. Buka terminal, lalu masuk ke folder project:
+
+```bash
+cd len-ioti-map
+```
+2.Install seluruh dependency yang diperlukan:
+
+```bash
+npm install
+```
+3. Jalsnkan Aplikasi 
 
 
-`npm start`
+```bash
+npm start
+```
+4.Setelah proses berhasil, buka alamat berikut pada browser: [http://localhost:3000](http://localhost:3000)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Aplikasi akan menampilkan peta OpenLayers dan beberapa tombol aksi di sisi kanan. Tombol tersebut digunakan untuk:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+>Mengubah mode tampilan dark dan light.
+>Membuka panel bantuan.
+>Membuka sidebar Coordinate Converter.
 
-### `npm test`
+5. Pada sidebar, tersedia dua mode konversi:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+DMS ke DD
 
-### `npm run build`
+Masukkan degree, minutes, seconds, dan arah koordinat. Tekan tombol Convert untuk mendapatkan nilai Decimal Degrees. Setelah hasil tersedia, gunakan tombol Pinpoint on map untuk menampilkan lokasi pada peta.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+DD ke DMS
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Masukkan nilai Decimal Degrees untuk latitude dan longitude. Tekan tombol Convert untuk mendapatkan hasil dalam format Degree, Minutes, Seconds.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Menjalankan Test menggunakan jest
+ jalankan test  menggunakan command 
 
-### `npm run eject`
+```bash
+npm test
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+untuk test berada di setiap folder fungsional di dalam src
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Test utility memeriksa keakuratan perhitungan DMS ke DD dan DD ke DMS. Test hook memeriksa state dan proses konversi. Test component memeriksa interaksi form dan proses penempatan marker. Test integration memeriksa alur aplikasi dari pembukaan sidebar sampai konversi koordinat.openLayers di-mock pada test agar Jest tidak perlu membuat peta yang sebenarnya. 
